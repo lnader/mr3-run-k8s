@@ -1,0 +1,72 @@
+# Default values for hive-on-mr3.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: riffyninc/hivemr3
+  tag: 0.8
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 4
+    memory: 32Gi
+  limits:
+    cpu: 4
+    memory: 32Gi
+
+user:
+  name: hive
+
+hive:
+  database:
+    name: hive5mr3
+    host: red0
+    port: 3306
+  warehouse:
+    dir: /tmp/hivemr3/warehouse
+  metastore:
+    host: red0
+    port: 9850
+    principal: hive/red0@RED
+    keytab:
+      file:
+    secure:
+      mode: true
+    heapsize: 16384
+    dbType: mysql
+  server2:
+    name: hiveserver2
+    service:
+      type: LoadBalancer
+    host:
+    port: 9852
+    principal: hive/red0@RED
+    authentication:
+      mode: KERBEROS
+    keytab:
+      file:
+    heapsize: 32768
+  client:
+    heapsize: 32768
+
+hadoop:
+  defaultFS: file:///
+
+  security:
+    authentication:  kerberos
+
+yarn:
+  resourcemanager:
+    principal: rm/red0@RED
+  http:
+    policy: HTTP_ONLY
+  timelineService:
+    hostname: indigo20
+
+workdir:
+  nfs:
+    server: "10.1.91.17"
+    path: "/work/nfs/mr3-run-work-dir"

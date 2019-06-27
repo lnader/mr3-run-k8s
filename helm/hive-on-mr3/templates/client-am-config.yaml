@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-am-config
+  namespace: {{ .Release.Namespace }}
+data:
+  # TODO - find a way to generate these instead of hard-coding
+  ats-secret-key: ce19a32c-e680-43bb-a0a3-4ff92838d3f7
+  key: a82a4585-a45c-4fc0-ad4d-7da0beec678a
+  mr3sessionid: 88cf6fab-741a-4728-a477-9100b569c9cb
+  timestamp: "26186"

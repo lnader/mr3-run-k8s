@@ -1,0 +1,1821 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hivemr3-conf-configmap
+  namespace: {{ .Release.Namespace }}
+
+data:
+  core-site.xml: |
+    <configuration>
+      <property>
+        <name>fs.defaultFS</name>
+        <value>{{ .Values.hadoop.defaultFS }}</value>
+      </property>
+
+      <property>
+        <name>hadoop.security.authentication</name>
+        <!-- <value>simple</value> -->
+        <value>{{ .Values.hadoop.security.authentication }}</value>
+      </property>
+
+      <property>
+        <name>dfs.encryption.key.provider.uri</name>
+        <value>kms://http@red0:9292/kms</value>
+      </property>
+
+      <!--
+      <property>
+        <name>ipc.client.fallback-to-simple-auth-allowed</name>
+        <value>true</value>
+      </property>
+       -->
+    </configuration>
+  hive-log4j.properties: |
+    # Licensed to the Apache Software Foundation (ASF) under one
+    # or more contributor license agreements.  See the NOTICE file
+    # distributed with this work for additional information
+    # regarding copyright ownership.  The ASF licenses this file
+    # to you under the Apache License, Version 2.0 (the
+    # "License"); you may not use this file except in compliance
+    # with the License.  You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+
+    # Root logger option
+    log4j.rootLogger=INFO, stdout
+
+    # Direct log messages to stdout
+    log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+    log4j.appender.stdout.Target=System.out
+    log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+    log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+  hive-log4j2.properties: |
+    # Licensed to the Apache Software Foundation (ASF) under one
+    # or more contributor license agreements.  See the NOTICE file
+    # distributed with this work for additional information
+    # regarding copyright ownership.  The ASF licenses this file
+    # to you under the Apache License, Version 2.0 (the
+    # "License"); you may not use this file except in compliance
+    # with the License.  You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+
+    status = INFO
+    name = HiveLog4j2
+    packages = org.apache.hadoop.hive.ql.log
+
+    # list of properties
+    property.hive.log.level = INFO
+    property.hive.perflogger.log.level = INFO
+
+    filters = threshold
+
+    filter.threshold.type = ThresholdFilter
+    filter.threshold.level = INFO
+
+    # list of all appenders
+    appenders = console
+
+    # console appender
+    appender.console.type = Console
+    appender.console.name = STDOUT
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = %d{ISO8601} %5p [%t] %c{2}: %m%n
+
+    # list of all loggers
+    loggers = NIOServerCnxn, ClientCnxnSocketNIO, DataNucleus, Datastore, JPOX, PerfLogger
+
+    logger.NIOServerCnxn.name = org.apache.zookeeper.server.NIOServerCnxn
+    logger.NIOServerCnxn.level = WARN
+
+    logger.ClientCnxnSocketNIO.name = org.apache.zookeeper.ClientCnxnSocketNIO
+    logger.ClientCnxnSocketNIO.level = WARN
+
+    logger.DataNucleus.name = DataNucleus
+    logger.DataNucleus.level = INFO
+
+    logger.Datastore.name = Datastore
+    logger.Datastore.level = INFO
+
+    logger.JPOX.name = JPOX
+    logger.JPOX.level = INFO
+
+    logger.PerfLogger.name = org.apache.hadoop.hive.ql.log.PerfLogger
+    logger.PerfLogger.level = ${sys:hive.perflogger.log.level}
+
+    # root logger
+    rootLogger.level = ${sys:hive.log.level}
+    rootLogger.appenderRefs = stdout
+    rootLogger.appenderRef.stdout.ref = STDOUT
+  hive-log4j2.properties.file: |
+    # Licensed to the Apache Software Foundation (ASF) under one
+    # or more contributor license agreements.  See the NOTICE file
+    # distributed with this work for additional information
+    # regarding copyright ownership.  The ASF licenses this file
+    # to you under the Apache License, Version 2.0 (the
+    # "License"); you may not use this file except in compliance
+    # with the License.  You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+
+    status = INFO
+    name = HiveLog4j2
+    packages = org.apache.hadoop.hive.ql.log
+
+    # list of properties
+    property.hive.log.level = INFO
+    property.hive.root.logger = DRFA
+    property.hive.log.dir = /tmp/
+    property.hive.log.file = hive.log
+    property.hive.perflogger.log.level = INFO
+
+    # list of all appenders
+    appenders = console, DRFA
+
+    # console appender
+    appender.console.type = Console
+    appender.console.name = console
+    appender.console.target = SYSTEM_ERR
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = %d{ISO8601} %5p [%t] %c{2}: %m%n
+
+    # daily rolling file appender
+    appender.DRFA.type = RollingRandomAccessFile
+    appender.DRFA.name = DRFA
+    appender.DRFA.fileName = /tmp/hive.log
+    # Use %pid in the filePattern to append <process-id>@<host-name> to the filename if you want separate log files for different CLI session
+    appender.DRFA.filePattern = /tmp/hive.log.%d{yyyy-MM-dd}
+    appender.DRFA.layout.type = PatternLayout
+    appender.DRFA.layout.pattern = %d{ISO8601} %5p [%t] %c{2}: %m%n
+    appender.DRFA.policies.type = Policies
+    appender.DRFA.policies.time.type = TimeBasedTriggeringPolicy
+    appender.DRFA.policies.time.interval = 1
+    appender.DRFA.policies.time.modulate = true
+    appender.DRFA.strategy.type = DefaultRolloverStrategy
+    appender.DRFA.strategy.max = 30
+
+    # list of all loggers
+    loggers = NIOServerCnxn, ClientCnxnSocketNIO, DataNucleus, Datastore, JPOX, PerfLogger
+
+    logger.NIOServerCnxn.name = org.apache.zookeeper.server.NIOServerCnxn
+    logger.NIOServerCnxn.level = WARN
+
+    logger.ClientCnxnSocketNIO.name = org.apache.zookeeper.ClientCnxnSocketNIO
+    logger.ClientCnxnSocketNIO.level = WARN
+
+    logger.DataNucleus.name = DataNucleus
+    logger.DataNucleus.level = ERROR
+
+    logger.Datastore.name = Datastore
+    logger.Datastore.level = ERROR
+
+    logger.JPOX.name = JPOX
+    logger.JPOX.level = ERROR
+
+    logger.PerfLogger.name = org.apache.hadoop.hive.ql.log.PerfLogger
+    logger.PerfLogger.level = ${sys:hive.perflogger.log.level}
+
+    # root logger
+    rootLogger.level = ${sys:hive.log.level}
+    rootLogger.appenderRefs = root
+    rootLogger.appenderRef.root.ref = ${sys:hive.root.logger}
+  hive-site.xml: |
+    <configuration>
+
+    <property>
+      <name>datanucleus.autoCreateSchema</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>datanucleus.cache.level2.type</name>
+      <value>none</value>
+    </property>
+
+    <property>
+      <name>datanucleus.fixedDatastore</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>dfs.client.mmap.enabled</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>dfs.short.circuit.shared.memory.watcher.interrupt.check.ms</name>
+      <value>0</value>
+    </property>
+
+    <property>
+      <name>hive.auto.convert.join</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.auto.convert.join.noconditionaltask</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.auto.convert.sortmerge.join</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.auto.convert.sortmerge.join.to.mapjoin</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.cbo.enable</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.cli.print.header</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.abortedtxn.threshold</name>
+      <value>1000</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.check.interval</name>
+      <value>300L</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.delta.num.threshold</name>
+      <value>10</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.delta.pct.threshold</name>
+      <value>0.1f</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.initiator.on</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.worker.threads</name>
+      <value>1</value>
+    </property>
+
+    <property>
+      <name>hive.compactor.worker.timeout</name>
+      <value>86400L</value>
+    </property>
+
+    <property>
+      <name>hive.compute.query.using.stats</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.conf.restricted.list</name>
+      <value>hive.security.authorization.enabled,hive.security.authenticator.manager,hive.security.authorization.manager,hive.users.in.admin.role</value>
+    </property>
+
+    <property>
+      <name>hive.convert.join.bucket.mapjoin.tez</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.default.fileformat</name>
+      <value>TextFile</value>
+    </property>
+
+    <property>
+      <name>hive.default.fileformat.managed</name>
+      <value>TextFile</value>
+    </property>
+
+    <property>
+      <name>hive.driver.parallel.compilation</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.enforce.sortmergebucketmapjoin</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.exec.compress.intermediate</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.exec.compress.output</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.exec.dynamic.partition</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.exec.dynamic.partition.mode</name>
+      <value>nonstrict</value>
+    </property>
+
+    <property>
+      <name>hive.exec.failure.hooks</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.exec.max.created.files</name>
+      <value>100000</value>
+    </property>
+
+    <property>
+      <name>hive.exec.max.dynamic.partitions</name>
+      <value>5000</value>
+    </property>
+
+    <property>
+      <name>hive.exec.max.dynamic.partitions.pernode</name>
+      <value>2000</value>
+    </property>
+
+    <property>
+      <name>hive.exec.orc.compression.strategy</name>
+      <value>SPEED</value>
+    </property>
+
+    <property>
+      <name>hive.exec.orc.default.compress</name>
+      <value>ZLIB</value>
+    </property>
+
+    <property>
+      <name>hive.exec.orc.default.stripe.size</name>
+      <value>67108864</value>
+    </property>
+
+    <property>
+      <name>hive.exec.orc.encoding.strategy</name>
+      <value>SPEED</value>
+    </property>
+
+    <property>
+      <name>hive.exec.orc.split.strategy</name>
+      <value>HYBRID</value>
+    </property>
+
+    <property>
+      <name>hive.exec.parallel</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.exec.parallel.thread.number</name>
+      <value>32</value>
+    </property>
+
+    <property>
+      <name>hive.exec.post.hooks</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.exec.pre.hooks</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.exec.reducers.bytes.per.reducer</name>
+      <value>67108864</value>
+    </property>
+
+    <property>
+      <name>hive.exec.reducers.max</name>
+      <value>1009</value>
+    </property>
+
+    <property>
+      <name>hive.exec.submit.local.task.via.child</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.exec.submitviachild</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.fetch.task.aggr</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.fetch.task.conversion</name>
+      <value>more</value>
+    </property>
+
+    <property>
+      <name>hive.fetch.task.conversion.threshold</name>
+      <value>1073741824</value>
+    </property>
+
+    <property>
+      <name>hive.limit.optimize.enable</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.limit.pushdown.memory.usage</name>
+      <value>0.04</value>
+    </property>
+
+    <property>
+      <name>hive.map.aggr</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.map.aggr.hash.force.flush.memory.threshold</name>
+      <value>0.9</value>
+    </property>
+
+    <property>
+      <name>hive.map.aggr.hash.min.reduction</name>
+      <value>0.99</value>
+    </property>
+
+    <property>
+      <name>hive.map.aggr.hash.percentmemory</name>
+      <value>0.5</value>
+    </property>
+
+    <property>
+      <name>hive.mapjoin.bucket.cache.size</name>
+      <value>10000</value>
+    </property>
+
+    <property>
+      <name>hive.mapjoin.hybridgrace.hashtable</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.mapjoin.optimized.hashtable</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.mapred.reduce.tasks.speculative.execution</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.merge.mapfiles</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.merge.mapredfiles</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.merge.nway.joins</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.merge.orcfile.stripe.level</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.merge.rcfile.block.level</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.merge.size.per.task</name>
+      <value>256000000</value>
+    </property>
+
+    <property>
+      <name>hive.merge.smallfiles.avgsize</name>
+      <value>16000000</value>
+    </property>
+
+    <property>
+      <name>hive.merge.tezfiles</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.authorization.storage.checks</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.cache.pinobjtypes</name>
+      <value>Table,Database,Type,FieldSchema,Order</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.client.connect.retry.delay</name>
+      <value>5s</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.client.socket.timeout</name>
+      <value>1800s</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.connect.retries</name>
+      <value>24</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.event.listeners</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.metastore.execute.setugi</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.failure.retries</name>
+      <value>24</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.pre.event.listeners</name>
+      <value>org.apache.hadoop.hive.ql.security.authorization.AuthorizationPreEventListener</value>
+    </property>
+    <property>
+      <name>metastore.pre.event.listeners</name>
+      <value>org.apache.hadoop.hive.ql.security.authorization.AuthorizationPreEventListener</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.server.max.threads</name>
+      <value>100000</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.bucketmapjoin</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.bucketmapjoin.sortedmerge</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.constant.propagation</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.index.filter</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.metadataonly</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.null.scan</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.reducededuplication</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.reducededuplication.min.reducer</name>
+      <value>4</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.sort.dynamic.partition</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.orc.compute.splits.num.threads</name>
+      <value>10</value>
+    </property>
+
+    <property>
+      <name>hive.orc.splits.include.file.footer</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.security.authenticator.manager</name>
+      <value>org.apache.hadoop.hive.ql.security.ProxyUserAuthenticator</value>
+    </property>
+
+    <property>
+      <name>hive.security.authorization.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.security.authorization.manager</name>
+      <!-- <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdConfOnlyAuthorizerFactory</value> -->
+      <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdHiveAuthorizerFactory</value>
+      <!-- <value>org.apache.ranger.authorization.hive.authorizer.RangerHiveAuthorizerFactory</value> -->
+    </property>
+
+    <property>
+      <name>hive.security.metastore.authenticator.manager</name>
+      <value>org.apache.hadoop.hive.ql.security.HadoopDefaultMetastoreAuthenticator</value>
+    </property>
+
+    <property>
+      <name>hive.security.metastore.authorization.auth.reads</name>
+      <value>true</value>
+    </property>
+
+    <!-- if enabled, a ZooKeeper client starts, so hive.zookeeper.quorum should be set properly -->
+    <!--
+    <property>
+      <name>hive.security.metastore.authorization.manager</name>
+      <value>org.apache.hadoop.hive.ql.security.authorization.StorageBasedAuthorizationProvider</value>
+    </property>
+     -->
+
+    <property>
+      <name>hive.security.authorization.sqlstd.confwhitelist.append</name>
+      <value>hive\.querylog\.location.*</value>
+    </property>
+
+    <property>
+      <name>hive.server2.allow.user.substitution</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication.spnego.keytab</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication.spnego.principal</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.server2.enable.doAs</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.server2.max.start.attempts</name>
+      <value>5</value>
+    </property>
+
+    <property>
+      <name>hive.server2.table.type.mapping</name>
+      <value>CLASSIC</value>
+    </property>
+
+    <property>
+      <name>hive.server2.tez.default.queues</name>
+      <value>default</value>
+    </property>
+
+    <property>
+      <name>hive.server2.tez.initialize.default.sessions</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.server2.tez.sessions.custom.queue.allowed</name>
+      <value>ignore</value>
+    </property>
+
+    <property>
+      <name>hive.server2.tez.sessions.per.default.queue</name>
+      <value>16</value>
+    </property>
+
+    <property>
+      <name>hive.server2.tez.sessions.restricted.configs</name>
+      <value>hive.execution.mode,hive.execution.engine</value>
+    </property>
+
+    <property>
+      <name>hive.server2.thrift.http.path</name>
+      <value>cliservice</value>
+    </property>
+
+    <property>
+      <name>hive.server2.thrift.max.worker.threads</name>
+      <value>500</value>
+    </property>
+
+    <property>
+      <name>hive.server2.transport.mode</name>
+      <value>binary</value>
+    </property>
+
+    <property>
+      <name>hive.server2.use.SSL</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.server2.webui.port</name>
+      <value>0</value>
+    </property>
+
+    <property>
+      <name>hive.server2.webui.use.ssl</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.smbjoin.cache.rows</name>
+      <value>10000</value>
+    </property>
+
+    <property>
+      <name>hive.start.cleanup.scratchdir</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.stats.autogather</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.stats.dbclass</name>
+      <value>fs</value>
+    </property>
+
+    <property>
+      <name>hive.stats.fetch.column.stats</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.stats.fetch.partition.stats</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.support.concurrency</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.tez.auto.reducer.parallelism</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.tez.bucket.pruning</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.tez.cartesian-product.enabled</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.tez.container.size</name>
+      <value>8192</value>
+    </property>
+
+    <property>
+      <name>hive.tez.cpu.vcores</name>
+      <value>-1</value>
+    </property>
+
+    <property>
+      <name>hive.tez.dynamic.partition.pruning</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.tez.dynamic.partition.pruning.max.data.size</name>
+      <value>104857600</value>
+    </property>
+
+    <property>
+      <name>hive.tez.dynamic.partition.pruning.max.event.size</name>
+      <value>1048576</value>
+    </property>
+
+    <property>
+      <name>hive.tez.exec.print.summary</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.tez.input.format</name>
+      <value>org.apache.hadoop.hive.ql.io.HiveInputFormat</value>
+    </property>
+
+    <property>
+      <name>hive.tez.input.generate.consistent.splits</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.tez.log.level</name>
+      <value>INFO</value>
+    </property>
+
+    <property>
+      <name>hive.tez.max.partition.factor</name>
+      <value>2.0</value>
+    </property>
+
+    <property>
+      <name>hive.tez.min.partition.factor</name>
+      <value>0.25</value>
+    </property>
+
+    <property>
+      <name>hive.tez.smb.number.waves</name>
+      <value>0.5</value>
+    </property>
+
+    <property>
+      <name>hive.txn.manager</name>
+      <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+    </property>
+
+    <property>
+      <name>hive.txn.max.open.batch</name>
+      <value>1000</value>
+    </property>
+
+    <property>
+      <name>hive.txn.timeout</name>
+      <value>300</value>
+    </property>
+
+    <property>
+      <name>hive.user.install.directory</name>
+      <value>/user/</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.execution.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.execution.mapjoin.minmax.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.execution.mapjoin.native.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.execution.mapjoin.native.fast.hashtable.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.execution.reduce.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.groupby.checkinterval</name>
+      <value>4096</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.groupby.flush.percent</name>
+      <value>0.1</value>
+    </property>
+
+    <property>
+      <name>hive.vectorized.groupby.maxentries</name>
+      <value>1000000</value>
+    </property>
+
+    <property>
+      <name>hive.warehouse.subdir.inherit.perms</name>
+      <value>true</value>
+    </property>
+
+    <!-- Metastore -->
+
+    <property>
+      <name>javax.jdo.option.ConnectionURL</name>
+      <value>jdbc:mysql://{{ .Values.hive.database.host }}:{{ .Values.hive.database.port }}/{{ .Values.hive.database.name }}?createDatabaseIfNotExist=true</value>
+    </property>
+
+    <property>
+      <name>javax.jdo.option.ConnectionDriverName</name>
+      <value>com.mysql.jdbc.Driver</value>
+    </property>
+
+    <property>
+      <name>javax.jdo.option.ConnectionUserName</name>
+      <value>hivemr3</value>
+    </property>
+
+    <property>
+      <name>javax.jdo.option.ConnectionPassword</name>
+      <value>password</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.kerberos.keytab.file</name>
+      <value>{{ .Values.hive.metastore.keytab.file }}</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.kerberos.principal</name>
+      <value>{{ .Values.hive.metastore.principal }}</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.sasl.enabled</name>
+      <value>{{ .Values.hive.metastore.secure.mode }}</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.uris</name>
+      <value>thrift://{{ .Values.hive.metastore.host }}:{{ .Values.hive.metastore.port }}</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.warehouse.dir</name>
+      <value>{{ .Values.hive.warehouse.dir }}</value>
+    </property>
+
+    <!-- new in Hive 3.0 -->
+
+    <property>
+      <name>hive.metastore.event.db.notification.api.auth</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>metastore.metastore.event.db.notification.api.auth</name>
+      <value>false</value>
+    </property>
+
+    <!-- HiveServer2 -->
+
+    <property>
+      <name>hive.users.in.admin.role</name>
+      <value>hive</value>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication</name>
+      <value>{{ .Values.hive.server2.authentication.mode }}</value>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication.kerberos.keytab</name>
+      <value>{{ .Values.hive.server2.keytab.file }}</value>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication.kerberos.principal</name>
+      <value>{{ .Values.hive.server2.principal }}</value>
+    </property>
+
+    <property>
+      <name>hive.server2.logging.operation.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.server2.thrift.http.port</name>
+      <value>10001</value>
+    </property>
+
+    <property>
+      <name>hive.server2.thrift.bind.host</name>
+      <value>{{ .Values.hive.server2.host }}</value>
+    </property>
+
+    <property>
+      <name>hive.server2.thrift.port</name>
+      <value>{{ .Values.hive.server2.port }}</value>
+    </property>
+
+    <property>
+      <name>hive.server2.thrift.sasl.qop</name>
+      <!--value>auth</value-->
+      <value>auth-conf</value>
+    </property>
+
+    <!-- Hive (configurable) -->
+
+    <property>
+      <name>hive.auto.convert.join.noconditionaltask.size</name>
+      <value>1145044992</value>
+    </property>
+
+    <property>
+      <name>hive.optimize.dynamic.partition.hashjoin</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.async.log.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>metastore.aggregate.stats.cache.enabled</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.metastore.aggregate.stats.cache.enabled</name>
+      <value>true</value>
+    </property>
+
+    <!-- MR3 LLAP (configurable) -->
+
+    <property>
+      <name>hive.llap.io.enabled</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.llap.io.memory.size</name>
+      <value>72Gb</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.llap.headroom.mb</name>
+      <value>8192</value>
+    </property>
+
+    <property>
+      <name>hive.llap.io.threadpool.size</name>
+      <value>10</value>
+    </property>
+
+    <property>
+      <name>hive.llap.daemon.num.executors</name>
+      <value>10</value>
+    </property>
+
+    <property>
+      <name>hive.llap.enable.grace.join.in.llap</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.llap.io.memory.mode</name>
+      <value>cache</value>
+    </property>
+
+    <property>
+      <name>hive.llap.io.use.lrfu</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.llap.object.cache.enabled</name>
+      <value>true</value>
+    </property>
+
+    <!-- MR3 (fixed) -->
+
+    <property>
+      <name>hive.execution.engine</name>
+      <value>mr3</value>
+    </property>
+
+    <property>
+      <name>hive.execution.mode</name>
+      <value>llap</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.container.use.per.query.cache</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.llap.hs2.coordinator.enabled</name>
+      <value>false</value>
+    </property>
+
+    <!-- should be unset -->
+    <property>
+      <name>hive.llap.daemon.service.hosts</name>
+      <value></value>
+    </property>
+
+    <property>
+      <name>hive.strict.checks.cartesian.product</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.server2.support.dynamic.service.discovery</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.cluster.delegation.token.store.class</name>
+      <value>org.apache.hadoop.hive.thrift.MemoryTokenStore</value>
+    </property>
+
+    <property>
+      <name>hive.llap.client.consistent.splits</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.llap.execution.mode</name>
+      <value>all</value>
+    </property>
+
+    <property>
+      <name>hive.aux.jars.path</name>
+      <value></value>
+    </property>
+
+    <!-- MR3 -->
+
+    <property>
+      <name>hive.mr3.use.daemon.shufflehandler</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.exec.print.summary</name>
+      <value>true</value>
+    </property>
+
+    <!-- Hive-on-MR3-on-K8s supports only 'shared session mode' because we cannot create new users on the fly -->
+    <property>
+      <name>hive.server2.mr3.share.session</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.container.combine.taskattempts</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.container.reuse</name>
+      <value>true</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.containergroup.scheme</name>
+      <value>all-in-one</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.container.max.java.heap.fraction</name>
+      <value>0.8f</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.map.task.memory.mb</name>
+      <value>8192</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.map.task.vcores</name>
+      <value>1</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.reduce.task.memory.mb</name>
+      <value>8192</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.reduce.task.vcores</name>
+      <value>1</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.all-in-one.containergroup.memory.mb</name>
+      <value>16384</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.all-in-one.containergroup.vcores</name>
+      <value>2</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.map.containergroup.memory.mb</name>
+      <value>16384</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.map.containergroup.vcores</name>
+      <value>2</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.reduce.containergroup.memory.mb</name>
+      <value>16384</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.reduce.containergroup.vcores</name>
+      <value>2</value>
+    </property>
+
+    <!-- Kubernetes -->
+
+    <property>
+      <name>hive.mr3.localize.session.jars</name>
+      <value>false</value>
+    </property>
+
+    <property>
+      <name>hive.exec.scratchdir</name>
+      <value>/opt/mr3-run/work-dir/${user.name}</value>
+    </property>
+
+    <property>
+      <name>hive.downloaded.resources.dir</name>
+      <value>/opt/mr3-run/work-dir/${hive.session.id}_resources</value>
+    </property>
+
+    <property>
+      <name>hive.exec.local.scratchdir</name>
+      <value>/opt/mr3-run/scratch-dir</value>
+    </property>
+
+    <property>
+      <name>hive.query.results.cache.directory</name>
+      <value>/opt/mr3-run/scratch-dir/_resultscache_</value>
+    </property>
+
+    <property>
+      <name>hive.server2.logging.operation.log.location</name>
+      <value>/opt/mr3-run/scratch-dir/operation_logs</value>
+    </property>
+
+    <property>
+      <name>hive.mr3.dag.additional.credentials.source</name>
+      <value>hdfs://red0:8020/tmp/hivemr3/warehouse/</value>
+    </property>
+
+    <!-- ZooKeeper -->
+
+    <property>
+      <name>hive.zookeeper.quorum</name>
+      <value>red0:2181</value>
+    </property>
+
+    <!-- Token renewal -->
+
+    <property>
+      <name>dfs.namenode.delegation.token.renew-interval</name>
+      <value>86400000</value>
+    </property>
+
+    <property>
+      <name>hive.cluster.delegation.token.renew-interval</name>
+      <value>86400000</value>
+    </property>
+
+    <!-- Beeline -->
+
+    <property>
+      <name>hive.async.log.enabled</name>
+      <value>true</value>
+    </property>
+
+    </configuration>
+  jgss.conf: |
+    "com.sun.security.jgss.initiate {
+     com.sun.security.auth.module.Krb5LoginModule required
+     doNotPrompt=true
+     useTicketCache=false
+     useKeyTab=true
+     debug=true;
+     };"
+  krb5.conf: |
+    "[libdefaults]
+      dns_lookup_realm = false
+      ticket_lifetime = 24h
+      renew_lifetime = 7d
+      forwardable = true
+      rdns = false
+      default_realm = RED
+      default_ccache_name = /tmp/krb5cc_%{uid}
+
+    [realms]
+      RED = {
+        admin_server = red0
+        kdc = red0
+      }"
+  mapred-site.xml: |
+    <configuration>
+    </configuration>
+  mr3-site.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+      <property>
+        <name>mr3.runtime</name>
+        <value>tez</value>
+      </property>
+
+      <property>
+        <name>mr3.cluster.use.hadoop-libs</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>mr3.lib.uris</name>
+        <value></value>
+      </property>
+
+      <property>
+        <name>mr3.aux.uris</name>
+        <value></value>
+      </property>
+
+      <property>
+        <name>mr3.am.launch.cmd-opts</name>
+        <value>-server -Djava.net.preferIPv4Stack=true -Dhadoop.metrics.log.level=WARN -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB -Dlog4j.configurationFile=k8s-mr3-container-log4j2.properties -Djavax.security.auth.useSubjectCredsOnly=false -Djava.security.auth.login.config=/opt/mr3-run/conf/jgss.conf -Djava.security.krb5.conf=/opt/mr3-run/conf/krb5.conf -Dsun.security.jgss.debug=true -Djavax.net.ssl.trustStore=/opt/mr3-run/key/hivemr3-ssl-certificate.jks -Djavax.net.ssl.trustStoreType=jks</value>
+      </property>
+
+      <property>
+        <name>mr3.am.staging-dir</name>
+        <value></value>
+      </property>
+
+      <property>
+        <name>mr3.am.generate.dag.graph.viz</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>mr3.container.kill.policy</name>
+        <value>container.kill.wait.workervertex</value>
+        <description>
+          container.kill.wait.workervertex: wait until WorkerVertexes terminate
+          container.kill.nowait: kill without waiting
+        </description>
+      </property>
+
+      <property>
+        <name>mr3.am.max.num.concurrent.dags</name>
+        <value>32</value>
+      </property>
+
+      <property>
+        <name>mr3.dag.priority.scheme</name>
+        <value>fifo</value>
+      </property>
+
+      <property>
+        <name>mr3.am.task.max.failed.attempts</name>
+        <value>1</value>
+      </property>
+
+      <property>
+        <name>mr3.am.client.thread-count</name>
+        <value>16</value>
+      </property>
+
+      <property>
+        <name>mr3.async.logging</name>
+        <value>true</value>
+      </property>
+
+      <!-- resource scheduler -->
+
+      <property>
+        <name>mr3.am.resourcescheduler.max.requests.per.taskscheduler</name>
+        <value>1000</value>
+      </property>
+
+      <!-- container -->
+
+      <property>
+        <name>mr3.container.launch.cmd-opts</name>
+        <value>-XX:+AlwaysPreTouch -Xss512k -XX:+UseG1GC -XX:TLABSize=8m -XX:+ResizeTLAB -XX:+UseNUMA -XX:+AggressiveOpts -XX:InitiatingHeapOccupancyPercent=40 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=200 -XX:MetaspaceSize=1024m -server -Djava.net.preferIPv4Stack=true -XX:NewRatio=8 -Dlog4j.configurationFile=k8s-mr3-container-log4j2.properties</value>
+        <!-- -XX:SoftRefLRUPolicyMSPerMB=25 -->
+      </property>
+
+      <property>
+        <name>mr3.container.reuse</name>
+        <value>true</value>
+      </property>
+
+      <property>
+        <name>mr3.container.stop.cross.dag.reuse</name>
+        <value>true</value>
+      </property>
+
+      <property>
+        <name>mr3.container.idle.timeout.ms</name>
+        <value>3600000</value>
+      </property>
+
+      <property>
+        <name>mr3.container.wait.final.message.sent</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>mr3.heartbeat.timeout.ms</name>
+        <value>600000</value>
+      </property>
+
+      <!-- Kubernetes -->
+
+      <!-- mr3.master.mode is set in mr3-setup.sh -->
+
+      <property>
+        <name>mr3.am.resource.memory.mb</name>
+        <value>32768</value>
+      </property>
+
+      <property>
+        <name>mr3.am.resource.cpu.cores</name>
+        <value>4</value>
+      </property>
+
+      <property>
+        <name>mr3.am.local.resourcescheduler.max.memory.mb</name>
+        <value>8192</value>
+      </property>
+
+      <property>
+        <name>mr3.am.local.resourcescheduler.max.cpu.cores</name>
+        <value>8</value>
+      </property>
+
+      <property>
+        <name>mr3.am.worker.mode</name>
+        <!-- <value>local</value> -->
+        <value>kubernetes</value>
+      </property>
+
+      <property>
+        <name>mr3.container.resourcescheduler.type</name>
+        <!-- <value>local</value> -->
+        <value>kubernetes</value>
+      </property>
+
+      <!-- should be revised if mr3.master.mode == MR3_MASTER_MODE_KUBERNETES = "kubernetes" -->
+      <property>
+        <name>mr3.am.launch.env</name>
+        <value>LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HADOOP_HOME/lib/native/</value>
+      </property>
+
+      <property>
+        <name>mr3.container.launch.env</name>
+        <value>LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/mr3-run/hadoop/apache-hadoop/lib/native</value>
+      </property>
+
+      <property>
+        <name>mr3.am.delete.local.working-dir</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>mr3.am.local.working-dir</name>
+        <value>/opt/mr3-run/am-local-dir/am-local-working-dir</value>
+      </property>
+
+      <property>
+        <name>mr3.am.local.log-dir</name>
+        <value>/opt/mr3-run/am-local-dir/am-local-log-dir</value>
+      </property>
+
+      <!-- These variables are all set in mr3/mr3-setup.sh:
+        mr3.cluster.additional.classpath
+        mr3.principal
+        mr3.keytab
+        mr3.token.renewal.hdfs.enabled
+        mr3.token.renewal.hive.enabled
+       -->
+
+      <property>
+        <name>mr3.token.renewal.pass.credentials.via.memory</name>
+        <value>true</value>
+      </property>
+
+      <property>
+        <name>mr3.am.token.renewal.paths</name>
+        <value>hdfs://red0:8020/user/hive/</value>
+      </property>
+
+      <!-- These variables are all set in mr3/mr3-setup.sh (for Kubernetes):
+        mr3.k8s.namespace
+        mr3.k8s.pod.master.serviceaccount
+        mr3.k8s.pod.master.image
+        mr3.k8s.pod.master.user
+        mr3.k8s.master.working.dir
+        mr3.k8s.pod.worker.image
+        mr3.k8s.pod.worker.user
+        mr3.k8s.worker.working.dir
+        mr3.k8s.keytab.secret
+        mr3.k8s.keytab.mount.dir
+        mr3.k8s.keytab.mount.file
+        mr3.k8s.master.persistentvolumeclaim.mounts
+        mr3.k8s.worker.persistentvolumeclaim.mounts
+       -->
+
+      <property>
+        <name>mr3.k8s.api.server.url</name>
+        <value>https://kubernetes.default.svc</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.nodes.polling.interval.ms</name>
+        <value>60000</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.pods.polling.interval.ms</name>
+        <value>15000</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.pod.creation.timeout.ms</name>
+        <value>60000</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.pod.master.emptydirs</name>
+        <value>/opt/mr3-run/work-local-dir</value>
+      </property>
+
+      <!--
+      <property>
+        <name>mr3.k8s.pod.worker.emptydirs</name>
+        <value>/opt/mr3-run/work-local-dir</value>
+      </property>
+       -->
+
+      <property>
+        <name>mr3.k8s.pod.worker.hostpaths</name>
+        <value>/data1/k8s,/data2/k8s,/data3/k8s,/data4/k8s,/data5/k8s,/data6/k8s</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.master.command</name>
+        <value>/opt/mr3-run/hive/run-master.sh</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.master.pod.affinity.match.label</name>
+        <value>hivemr3_app=hiveserver2</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.worker.command</name>
+        <value>/opt/mr3-run/hive/run-worker.sh</value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.pod.worker.hostpaths</name>
+        <value></value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.pod.worker.node.selector</name>
+        <value></value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.pod.image.pull.policy</name>
+        {{if .Values.mr3.k8s.pod.image.pullPolicy }}
+        <value>{{ .Values.mr3.k8s.pod.image.pullPolicy }}</value>
+        {{ else }}
+        <value>Always</value>
+        {{ end }}
+      </property>
+
+      <property>
+        <name>mr3.k8s.pod.image.pull.secrets</name>
+        <value></value>
+      </property>
+
+      <property>
+        <name>mr3.k8s.host.aliases</name>
+        <value>gold0=10.1.90.9,red0=10.1.91.4,indigo20=10.1.91.41</value>
+      </property>
+
+      <property>
+        <name>mr3.app.history.logging.enabled</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>mr3.dag.history.logging.enabled</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>mr3.task.history.logging.enabled</name>
+        <value>false</value>
+      </property>
+
+    </configuration>
+  tez-site.xml: |
+    <configuration>
+      <property>
+        <name>tez.counters.max</name>
+        <value>10000</value>
+      </property>
+
+      <property>
+        <name>tez.counters.max.groups</name>
+        <value>3000</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.io.sort.mb</name>
+        <value>1040</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.optimize.local.fetch</name>
+        <value>true</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.pipelined.sorter.sort.threads</name>
+        <value>2</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.sorter.class</name>
+        <value>PIPELINED</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.unordered.output.buffer.size-mb</name>
+        <value>307</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle-vertex-manager.max-src-fraction</name>
+        <value>0.4</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle-vertex-manager.min-src-fraction</name>
+        <value>0.2</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.pipelined.sorter.lazy-allocate.memory</name>
+        <value>false</value>
+      </property>
+
+      <!-- MR3 0.4 -->
+
+      <property>
+        <name>tez.runtime.pipelined.sorter.use.soft.reference</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle-vertex-manager.enable.auto-parallel</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle-vertex-manager.auto-parallel.min.num.tasks</name>
+        <value>20</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage</name>
+        <value>10</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle-vertex-manager.use-stats-auto-parallelism</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle.vertex.manager.auto.parallelism.min.percent</name>
+        <value>20</value>
+      </property>
+
+      <!-- MR3 0.5 -->
+
+      <property>
+        <name>tez.am.shuffle.auxiliary-service.id</name>
+        <value>tez_shuffle</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle.port</name>
+        <value>15551</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle.connection-keep-alive.enable</name>
+        <value>true</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle.max.thread</name>
+        <value>0</value>
+      </property>
+
+      <property>
+        <name>tez.shuffle.listen.queue.size</name>
+        <value>16384</value>
+      </property>
+
+      <!-- MR3 0.7 -->
+
+      <property>
+        <name>tez.runtime.pipelined-shuffle.enabled</name>
+        <value>false</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.enable.final-merge.in.output</name>
+        <value>true</value>
+      </property>
+
+      <property>
+        <name>tez.runtime.shuffle.src-attempt.abort.limit</name>
+        <value>5</value>
+      </property>
+
+      <!-- MR3 0.8 -->
+
+      <property>
+        <name>tez.runtime.shuffle.connect.timeout</name>
+        <value>2500</value>
+      </property>
+
+    </configuration>
+  yarn-site.xml: |
+    <configuration>
+      <property>
+        <name>yarn.resourcemanager.principal</name>
+        <value>{{ .Values.yarn.resourcemanager.principal }}</value>
+      </property>
+      <property>
+        <name>yarn.http.policy</name>
+        <value>{{ .Values.yarn.http.policy }}</value>
+      </property>
+
+      <property>
+        <name>yarn.timeline-service.hostname</name>
+        <value>{{ .Values.yarn.timelineService.hostname }}</value>
+      </property>
+    </configuration>

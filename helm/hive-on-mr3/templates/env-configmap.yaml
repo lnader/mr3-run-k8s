@@ -44,8 +44,8 @@ data:
     # Step 1. Building a Docker image
     #
 
-    DOCKER_SERVER=10.1.91.17:5000
-    DOCKER_HIVE_IMG=hive5
+    DOCKER_SERVER={{ .Values.image.repository }}
+    DOCKER_HIVE_IMG="{{ .Values.image.name }}:{{ .Values.image.tag }}"
     DOCKER_RANGER_IMG=ranger
     DOCKER_ATS_IMG=ats-2.7.7
     DOCKER_USER=hive
@@ -149,7 +149,7 @@ data:
     #
 
     # Heap size in MB for Metastore
-    HIVE_METASTORE_HEAPSIZE= {{ .Values.hive.metastore.heapsize }}
+    HIVE_METASTORE_HEAPSIZE={{ .Values.hive.metastore.heapsize }}
 
     # Type of Metastore database which is used when running 'schematool -initSchema'
     HIVE_METASTORE_DB_TYPE={{ .Values.hive.metastore.dbType }}

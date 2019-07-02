@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: hiveserver2-workdir-pvc
+spec:
+  resources:
+    requests:
+      storage: {{ .Values.hive.server2.workdir.size }}
+  accessModes:
+  - ReadWriteMany
+  storageClassName: ""

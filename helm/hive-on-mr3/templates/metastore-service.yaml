@@ -1,0 +1,23 @@
+{{ if gt .Values.hive.metastore.replicaCount 0.0 }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.hive.metastore.service.name }}
+spec:
+  {{if eq .Values.hive.metastore.service.type "LoadBalancer"}}
+  type: LoadBalancer
+  externalIPs:
+  - 10.1.91.41
+  {{ else if eq .Values.hive.metastore.service.type "NodePort" }}
+  type: NodePort
+  {{ else }}
+  type: ClusterIP
+  {{end}}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.hive.metastore.port }}
+    targetPort: {{ .Values.hive.metastore.port }}
+  selector:
+    hivemr3_app: metastore
+{{ end }}

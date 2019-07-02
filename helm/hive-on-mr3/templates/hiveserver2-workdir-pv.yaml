@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: workdir-pv
+  name: hiveserver2-workdir-pv
 spec:
   capacity:
-    storage: 10Gi
+    storage: {{ .Values.hive.server2.workdir.size }}
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
-  {{if .Values.workdir.hostPath }}
+  {{if .Values.hive.server2.workdir.hostPath }}
   hostPath:
-    path: {{ .Values.workdir.hostPath.path }}
+    path: {{ .Values.hive.server2.workdir.hostPath.path }}
   {{else if .Values.workdir.nfs }}
   nfs:
     server: {{ .Values.workdir.nfs.server }}

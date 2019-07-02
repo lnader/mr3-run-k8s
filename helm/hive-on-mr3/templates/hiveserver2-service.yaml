@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ .Values.hive.server2.name }}
+  name: {{ .Values.hive.server2.service.name }}
 spec:
   {{if eq .Values.hive.server2.service.type "LoadBalancer"}}
   type: LoadBalancer

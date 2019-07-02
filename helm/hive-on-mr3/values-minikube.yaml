@@ -2,44 +2,30 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
-resources:
-  requests:
-    cpu: 1
-    memory: 4Gi
-  limits:
-    cpu: 2
-    memory: 4Gi
-
-mr3:
-  k8s:
-    pod:
-      image:
-        pullPolicy: Never
-
 hive:
   warehouse:
     dir: file:///opt/mr3-run/work-dir/warehouse
   metastore:
+    # if you want to create a metastore as part of this chart then change the
+    # replicaCount to 1
+    replicaCount: 1
     secure:
       mode: false
     heapsize: 2048
-    dbType: mysql
+    workdir:
+      hostPath:
+        path: "/home/hivemr3/metastore-workdir/"
   server2:
+    replicaCount: 1
     service:
       type: NodePort
     authentication:
       mode: simple
-    heapsize: 4096
-  client:
-    heapsize: 4096
-
+    heapsize: 2048
+    workdir:
+      hostPath:
+        path: "/home/hivemr3/hiveserver2-workdir/"
 hadoop:
   defaultFS: file:///
   security:
     authentication:  simple
-
-workdir:
-  hostPath:
-     path: "/home/hivemr3/workdir"

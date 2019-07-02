@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: hivemr3-hiveserver2
 spec:
-  replicas: 1
+  replicas: {{ .Values.hive.server2.replicaCount}}
   selector:
     hivemr3_hive_source: hivesrc5
     hivemr3_app: hiveserver2
@@ -30,7 +30,7 @@ spec:
         hostnames:
         - "indigo20"
       containers:
-      - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      - image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         command: ["/opt/mr3-run/hive/hiveserver2-service.sh"]
         args: ["start", "--kubernetes"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -56,13 +56,15 @@ spec:
             configMapKeyRef:
               name: client-am-config
               key: ats-secret-key
+        {{ if .Values.hive.server2.resources}}
         resources:
           requests:
-            cpu: {{ .Values.resources.requests.cpu}}
-            memory: {{ .Values.resources.requests.memory}}
+            cpu: {{ .Values.hive.server2.resources.requests.cpu}}
+            memory: {{ .Values.hive.server2.resources.requests.memory}}
           limits:
-            cpu: {{ .Values.resources.limits.cpu}}
-            memory: {{ .Values.resources.limits.memory}}
+            cpu: {{ .Values.hive.server2.resources.limits.cpu}}
+            memory: {{ .Values.hive.server2.resources.limits.memory}}
+        {{ end }}
         ports:
         - containerPort: 9852
           protocol: TCP
@@ -96,6 +98,6 @@ spec:
         emptyDir: {}
       - name: work-dir-volume
         persistentVolumeClaim:
-          claimName: workdir-pvc
+          claimName: hiveserver2-workdir-pvc
       - name: hiveserver2-ranger-policy-k8s-volume
         emptyDir: {}

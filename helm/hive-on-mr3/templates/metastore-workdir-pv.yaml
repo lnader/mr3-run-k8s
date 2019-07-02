@@ -1,0 +1,20 @@
+{{ if gt .Values.hive.metastore.replicaCount 0.0 }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: metastore-workdir-pv
+spec:
+  capacity:
+    storage: {{ .Values.hive.metastore.workdir.size }}
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  {{if .Values.hive.metastore.workdir.hostPath }}
+  hostPath:
+    path: {{ .Values.hive.metastore.workdir.hostPath.path }}
+  {{else if .Values.workdir.nfs }}
+  nfs:
+    server: {{ .Values.hiveworkdir.nfs.server }}
+    path: {{ .Values.workdir.nfs.path }}
+  {{ end }}
+{{ end }}

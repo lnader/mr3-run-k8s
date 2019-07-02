@@ -1,0 +1,32 @@
+# Default values for hive-on-mr3.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+hive:
+  metastore:
+    # Define resources for production environment
+    heapsize: 32768
+    resources:
+      requests:
+        cpu: 4
+        memory: 32Gi
+      limits:
+        cpu: 4
+        memory: 32Gi
+    workdir:
+      size: 10Gi
+  server2:
+    replicaCount: 1
+    heapsize: 32768
+    # Define resources for production environment
+    resources:
+      requests:
+        cpu: 4
+        memory: 32Gi
+      limits:
+        cpu: 4
+        memory: 32Gi
+    workdir:
+      size: 10Gi
+  client:
+    heapsize: 32768

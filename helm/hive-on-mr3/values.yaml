@@ -2,23 +2,17 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
 image:
-  repository: riffyninc/hivemr3
-  tag: 0.8
+  repository: riffyninc
+  name: hivemr3
+  tag: 0.8.3
   pullPolicy: IfNotPresent
 
-resources:
-  requests:
-    cpu: 4
-    memory: 32Gi
-  limits:
-    cpu: 4
-    memory: 32Gi
-
-user:
-  name: hive
+mr3:
+  k8s:
+    pod:
+      image:
+        pullPolicy: Never
 
 hive:
   database:
@@ -28,6 +22,12 @@ hive:
   warehouse:
     dir: /tmp/hivemr3/warehouse
   metastore:
+    # if you want to create a metastore as part of this chart then change the
+    # replicaCount to 1
+    replicaCount: 0
+    service:
+      name: red0 # must be the same as metastore.host
+      type: ClusterIP
     host: red0
     port: 9850
     principal: hive/red0@RED
@@ -36,12 +36,23 @@ hive:
     secure:
       mode: true
     heapsize: 16384
+    # Moved these to values-production.yaml
+    # resources:
+    #   requests:
+    #     cpu: 4
+    #     memory: 32Gi
+    #   limits:
+    #     cpu: 4
+    #     memory: 32Gi
     dbType: mysql
+    workdir:
+      size: 10Gi
   server2:
-    name: hiveserver2
+    replicaCount: 1
     service:
+      name: hiveserver2 # must be the same as server2.host
       type: LoadBalancer
-    host:
+    host: hiveserver2
     port: 9852
     principal: hive/red0@RED
     authentication:
@@ -49,6 +60,19 @@ hive:
     keytab:
       file:
     heapsize: 32768
+    # Moved these to values-production.yaml
+    # resources:
+    #   requests:
+    #     cpu: 4
+    #     memory: 32Gi
+    #   limits:
+    #     cpu: 4
+    #     memory: 32Gi
+    workdir:
+      size: 10Gi
+      nfs:
+        server: "10.1.91.17"
+        path: "/work/nfs/mr3-run-work-dir"
   client:
     heapsize: 32768
 
@@ -65,8 +89,3 @@ yarn:
     policy: HTTP_ONLY
   timelineService:
     hostname: indigo20
-
-workdir:
-  nfs:
-    server: "10.1.91.17"
-    path: "/work/nfs/mr3-run-work-dir"

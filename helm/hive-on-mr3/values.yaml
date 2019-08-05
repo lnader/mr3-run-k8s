@@ -5,14 +5,10 @@
 image:
   repository: riffyninc
   name: hivemr3
-  tag: 0.8.3
-  pullPolicy: IfNotPresent
+  tag: 0.9.13
+  pullPolicy: Always
 
-mr3:
-  k8s:
-    pod:
-      image:
-        pullPolicy: Never
+
 
 hive:
   database:
@@ -26,7 +22,7 @@ hive:
     # replicaCount to 1
     replicaCount: 0
     service:
-      name: red0 # must be the same as metastore.host
+      name: metastore # must be the same as metastore.host
       type: ClusterIP
     host: red0
     port: 9850
@@ -36,6 +32,10 @@ hive:
     secure:
       mode: true
     heapsize: 16384
+    db:
+      type: MYSQL
+    schema:
+      verification: true
     # Moved these to values-production.yaml
     # resources:
     #   requests:
@@ -44,7 +44,6 @@ hive:
     #   limits:
     #     cpu: 4
     #     memory: 32Gi
-    dbType: mysql
     workdir:
       size: 10Gi
   server2:
@@ -52,6 +51,8 @@ hive:
     service:
       name: hiveserver2 # must be the same as server2.host
       type: LoadBalancer
+    enable:
+      doAs: false
     host: hiveserver2
     port: 9852
     principal: hive/red0@RED
@@ -75,7 +76,38 @@ hive:
         path: "/work/nfs/mr3-run-work-dir"
   client:
     heapsize: 32768
+  mr3:
+    allInOne:
+      containergroup:
+        memory:
+          mb: 16384
+        vcores: 2
+    map:
+      containergroup:
+        memory:
+          mb: 16384
+        vcores: 2
+    reduce:
+      containergroup:
+        memory:
+          mb: 16384
+          vcores: 2
+    llap:
+      headroom:
+        mb: 8192
 
+    k8s:
+      pod:
+        image:
+          pullPolicy: Never
+
+mr3:
+  am:
+    resource:
+      memory:
+        mb: 32768
+      cpu:
+        cores: 4
 hadoop:
   defaultFS: file:///
 

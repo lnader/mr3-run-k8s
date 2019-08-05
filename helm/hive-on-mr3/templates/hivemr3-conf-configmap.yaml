@@ -701,7 +701,7 @@ data:
 
     <property>
       <name>hive.server2.enable.doAs</name>
-      <value>true</value>
+      <value>{{ .Values.hive.server2.enable.doAs }}</value>
     </property>
 
     <property>
@@ -946,6 +946,12 @@ data:
 
     <!-- Metastore -->
 
+
+    <property>
+      <name>hive.metastore.db.type</name>
+      <value>{{ .Values.hive.metastore.db.type }}</value>
+    </property>
+
     <property>
       <name>javax.jdo.option.ConnectionURL</name>
       <value>jdbc:mysql://{{ .Values.hive.database.host }}:{{ .Values.hive.database.port }}/{{ .Values.hive.database.name }}?createDatabaseIfNotExist=true</value>
@@ -953,19 +959,29 @@ data:
 
     <property>
       <name>javax.jdo.option.ConnectionDriverName</name>
-      <value>com.mysql.jdbc.Driver</value>
+      <value>{{ .Values.hive.database.driver }}</value>
     </property>
 
     <property>
       <name>javax.jdo.option.ConnectionUserName</name>
-      <value>hivemr3</value>
+      <value>{{ .Values.hive.database.username }}</value>
     </property>
 
     <property>
       <name>javax.jdo.option.ConnectionPassword</name>
-      <value>password</value>
+      <value>{{ .Values.hive.database.password }}</value>
     </property>
 
+    <property>
+      <name>hive.metastore.schema.verification</name>
+      <value>{{ .Values.hive.metastore.schema.verification }}</value>
+    </property>
+    <!--
+    <property>
+      <name>datanucleus.schema.autoCreateTables</name>
+      <value>true</value>
+    </property>
+    -->
     <property>
       <name>hive.metastore.kerberos.keytab.file</name>
       <value>{{ .Values.hive.metastore.keytab.file }}</value>
@@ -1243,32 +1259,32 @@ data:
 
     <property>
       <name>hive.mr3.all-in-one.containergroup.memory.mb</name>
-      <value>16384</value>
+      <value>{{ .Values.hive.mr3.allInOne.containergroup.memory.mb }}</value>
     </property>
 
     <property>
       <name>hive.mr3.all-in-one.containergroup.vcores</name>
-      <value>2</value>
+      <value>{{ .Values.hive.mr3.allInOne.containergroup.vcores }}</value>
     </property>
 
     <property>
       <name>hive.mr3.map.containergroup.memory.mb</name>
-      <value>16384</value>
+      <value>{{ .Values.hive.mr3.map.containergroup.memory.mb }}</value>
     </property>
 
     <property>
       <name>hive.mr3.map.containergroup.vcores</name>
-      <value>2</value>
+      <value>{{ .Values.hive.mr3.map.containergroup.vcores }}</value>
     </property>
 
     <property>
       <name>hive.mr3.reduce.containergroup.memory.mb</name>
-      <value>16384</value>
+      <value>{{ .Values.hive.mr3.reduce.containergroup.memory.mb }}</value>
     </property>
 
     <property>
       <name>hive.mr3.reduce.containergroup.vcores</name>
-      <value>2</value>
+      <value>{{ .Values.hive.mr3.reduce.containergroup.vcores }}</value>
     </property>
 
     <!-- Kubernetes -->
@@ -1365,6 +1381,7 @@ data:
     <?xml version="1.0" encoding="UTF-8"?>
     <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
     <configuration>
+
       <property>
         <name>mr3.runtime</name>
         <value>tez</value>
@@ -1480,12 +1497,12 @@ data:
 
       <property>
         <name>mr3.am.resource.memory.mb</name>
-        <value>32768</value>
+        <value>{{ .Values.mr3.am.resource.memory.mb}}</value>
       </property>
 
       <property>
         <name>mr3.am.resource.cpu.cores</name>
-        <value>4</value>
+        <value>{{ .Values.mr3.am.resource.cpu.cores}}</value>
       </property>
 
       <property>
@@ -1634,11 +1651,7 @@ data:
 
       <property>
         <name>mr3.k8s.pod.image.pull.policy</name>
-        {{if .Values.mr3.k8s.pod.image.pullPolicy }}
-        <value>{{ .Values.mr3.k8s.pod.image.pullPolicy }}</value>
-        {{ else }}
         <value>Always</value>
-        {{ end }}
       </property>
 
       <property>

@@ -29,6 +29,15 @@ spec:
       - ip: "10.1.91.41"
         hostnames:
         - "indigo20"
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  hivemr3_app: metastore
       containers:
       - image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         command: ["/opt/mr3-run/hive/hiveserver2-service.sh"]
@@ -98,6 +107,6 @@ spec:
         emptyDir: {}
       - name: work-dir-volume
         persistentVolumeClaim:
-          claimName: hiveserver2-workdir-pvc
+          claimName: workdir-pvc
       - name: hiveserver2-ranger-policy-k8s-volume
         emptyDir: {}

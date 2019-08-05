@@ -45,7 +45,8 @@ data:
     #
 
     DOCKER_SERVER={{ .Values.image.repository }}
-    DOCKER_HIVE_IMG="{{ .Values.image.name }}:{{ .Values.image.tag }}"
+    DOCKER_HIVE_IMG={{ .Values.image.name }}
+    DOCKER_HIVE_IMG_TAG={{ .Values.image.tag }}
     DOCKER_RANGER_IMG=ranger
     DOCKER_ATS_IMG=ats-2.7.7
     DOCKER_USER=hive
@@ -152,7 +153,7 @@ data:
     HIVE_METASTORE_HEAPSIZE={{ .Values.hive.metastore.heapsize }}
 
     # Type of Metastore database which is used when running 'schematool -initSchema'
-    HIVE_METASTORE_DB_TYPE={{ .Values.hive.metastore.dbType }}
+    HIVE_METASTORE_DB_TYPE={{ .Values.hive.metastore.db.type }}
 
     #
     # For running HiveCLI

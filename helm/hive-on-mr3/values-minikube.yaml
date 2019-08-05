@@ -1,13 +1,28 @@
 # Default values for hive-on-mr3.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
+mr3:
+  am:
+    resource:
+      memory:
+        mb: 1024
+      cpu:
+        cores: 1
 hive:
+  database:
+    host: mysql
+    username: root
+    password: Ab8Gc0zskx
+    driver: com.mysql.jdbc.Driver
   warehouse:
     dir: file:///opt/mr3-run/work-dir/warehouse
   metastore:
     # if you want to create a metastore as part of this chart then change the
     # replicaCount to 1
+    host: metastore
+    service:
+      name: metastore # must be the same as metastore.host
+      type: ClusterIP
     replicaCount: 1
     secure:
       mode: false
@@ -16,7 +31,6 @@ hive:
       hostPath:
         path: "/home/hivemr3/metastore-workdir/"
   server2:
-    replicaCount: 1
     service:
       type: NodePort
     authentication:
@@ -28,4 +42,4 @@ hive:
 hadoop:
   defaultFS: file:///
   security:
-    authentication:  simple
+    authentication: simple
